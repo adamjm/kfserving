@@ -4,6 +4,7 @@ HAS_LINT := $(shell command -v golint;)
 # Image URL to use all building/pushing image targets
 IMG ?= kfserving-controller:latest
 EXECUTOR_IMG ?= kfserving-executor:latest
+ARCH ?= $(shell uname -m)
 
 all: test manager executor
 
@@ -73,7 +74,7 @@ endif
 
 # Build the docker image
 docker-build: test
-	docker build . -t ${IMG}
+	docker build -e ARCH=${ARCH} . -t ${IMG}
 	@echo "updating kustomize image patch file for manager resource"
 
 	# Use perl instead of sed to avoid OSX/Linux compatibility issue:
@@ -85,7 +86,7 @@ docker-push:
 	docker push ${IMG}
 
 docker-build-executor: test
-	docker build -f executor.Dockerfile . -t ${EXECUTOR_IMG}
+	docker build -e ARCH=${ARCH} -f executor.Dockerfile . -t ${EXECUTOR_IMG}
 
 docker-push-executor:
 	docker push ${EXECUTOR_IMG}
